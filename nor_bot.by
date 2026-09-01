@@ -1,0 +1,34 @@
+import os
+import telebot
+from flask import Flask
+from threading import Thread
+
+# 1. حط التوكن بتاعك هنا
+TOKEN = "حط_توكن_البوت_هنا"
+
+bot = telebot.TeleBot(TOKEN)
+app = Flask(__name__)
+
+# 2. امر /start
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "اهلا بيك! البوت شغال على Render ✅")
+
+# 3. يرد على اي رسالة
+@bot.message_handler(func=lambda message: True)
+def echo_all(message):
+    bot.reply_to(message, f"انت قلت: {message.text}")
+
+# 4. نخلي Flask شغال عشان Render مايقفلش الخدمة
+@app.route('/')
+def home():
+    return "nor_bot is running"
+
+def run_bot():
+    bot.infinity_polling()
+
+if __name__ == "__main__":
+    # نشغل البوت في Thread منفصل
+    Thread(target=run_bot).start()
+    # ونشغل Flask
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
